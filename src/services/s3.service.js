@@ -1,4 +1,4 @@
-import { S3Client, ListBucketsCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, ListBucketsCommand, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 
@@ -29,6 +29,23 @@ export const getUploadUrl = async (fileName, fileType) => {
     return uploadUrl;
   } catch (error) { 
     console.error("Lỗi khi tạo URL upload:", error);
+    throw error;
+  }
+}
+
+
+export const getReadUrl = async (fileName) => {
+  const command = new GetObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: fileName,
+  })
+
+  try {
+    // Tạo link đọc sống 1 giờ
+    const readUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    return readUrl;
+  } catch (error) {
+    console.error("Lỗi khi tạo URL đọc:", error);
     throw error;
   }
 }

@@ -26,3 +26,16 @@ export const verifyToken = (req, res, next) => {
   }
 
 }
+
+
+// Middleware kiểm tra vai trò admin
+export const verifyAdmin = (req, res, next) => {
+  if(req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({
+      success: false,
+      message: "Yêu cầu quyền admin để thực hiện hành động này"
+    });
+  }
+}

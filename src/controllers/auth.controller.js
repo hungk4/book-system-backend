@@ -164,7 +164,7 @@ export const socialLoginCallback = async (req, res) => {
   // Passport sẽ tự động gắn user từ DB vào req.user (từ hàm done() trong passport.js)
 
   if(!req.user){
-    return res.json(401).json({
+    return res.status(401).json({
       success: false,
       message: "Xác thực thất bại",
     });

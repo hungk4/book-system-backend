@@ -13,7 +13,6 @@ router.post("/register", register);
 router.post("/login", login);
 
 // --- API ĐĂNG NHẬP GOOGLE ---
-
 // (http://localhost:5000/api/auth/google) - Chuyển hướng đăng nhập Google
 router.get(
   "/google",
@@ -27,7 +26,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", {
     failureRedirect: `${process.env.CLIENT_URL}/login-failed`, // Nếu thất bại, redirect về FE
-    session: false, // Rất quan trọng: Không dùng session
+    session: false, // Rất quan trọng: Không dùng session , Passport mặc định dùng Session/Cookie
   }),
   socialLoginCallback // Hàm controller sẽ tạo JWT
 );
