@@ -24,13 +24,12 @@ router.post("/", verifyToken, verifyAdmin, createBook);
 
 
 // --- Public Routes ---
-
-// GET /api/books
+// GET /api/books - Lấy danh sách tất cả sách
 router.get('/', getBooks);
 
-// GET /api/books/:id
+// GET /api/books/:id - Chi tiết sách
 router.get('/:id', getBookDetail); 
 
-// GET /api/books/read/:id
+// GET /api/books/read/:id - Đọc sách (yêu cầu xác thực)
 router.get('/read/:id', verifyToken, readBook); 
 export default router;
