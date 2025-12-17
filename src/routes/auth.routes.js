@@ -26,7 +26,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", {
     failureRedirect: `${process.env.CLIENT_URL}/login-failed`, // Nếu thất bại, redirect về FE
-    session: false, // Rất quan trọng: Không dùng session , Passport mặc định dùng Session/Cookie
+    session: false, // Passport mặc định dùng Session/Cookie: User đăng nhập -> Server tạo một "Session ID" -> Lưu thông tin user vào bộ nhớ (RAM hoặc DB) -> Gửi Session ID về trình duyệt dưới dạng Cookie.
   }),
   socialLoginCallback // Hàm controller sẽ tạo JWT
 );
