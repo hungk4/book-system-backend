@@ -118,6 +118,14 @@ export const login = async (req, res) => {
 
     const user = result.rows[0];
 
+    if (!user.password_hash) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Tài khoản này được đăng ký qua Google. Vui lòng sử dụng chức năng 'Đăng nhập với Google",
+      });
+    }
+
     // 2. So sánh mật khẩu
     const isMatch = await bcrypt.compare(password, user.password_hash);
 
@@ -142,11 +150,19 @@ export const login = async (req, res) => {
 
     const token = jwt.sign(payload, secret, { expiresIn: "1h" }); // token sống 1 giờ
 
+    const userData = JSON.stringify({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    });
+
     // 4. Trả về token
     res.json({
       success: true,
       message: "Đăng nhập thành công",
       token,
+      user: userData,
     });
   } catch (error) {
     console.error("Lỗi khi đăng nhập:", error.message);
@@ -157,13 +173,12 @@ export const login = async (req, res) => {
   }
 };
 
-
 //  Xử lý Callback từ Social Login
 export const socialLoginCallback = async (req, res) => {
   // Nếu code chạy đến được đây, Passport đã xác thực user thành công
   // Passport sẽ tự động gắn user từ DB vào req.user (từ hàm done() trong passport.js)
 
-  if(!req.user){
+  if (!req.user) {
     return res.status(401).json({
       success: false,
       message: "Xác thực thất bại",
@@ -186,7 +201,14 @@ export const socialLoginCallback = async (req, res) => {
 
   const token = jwt.sign(payload, secret, { expiresIn: "1h" });
 
+  const userData = JSON.stringify({
+    id: user.id,
+    email: user.email,
+    username: user.username,
+    role: user.role,
+  });
 
-  // TRẢ TOKEN VỀ CHO FRONTEND
-  res.redirect(`${process.env.CLIENT_URL}/login-success?token=${token}`);
-}
+  res.redirect(
+    `${process.env.CLIENT_URL}/login?token=${token}&user=${userData}`
+  );
+};

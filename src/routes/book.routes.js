@@ -31,5 +31,6 @@ router.get('/', getBooks);
 router.get('/:id', getBookDetail); 
 
 // GET /api/books/read/:id - Đọc sách (yêu cầu xác thực)
-router.get('/read/:id', verifyToken, readBook); 
+// router.get('/read/:id', verifyToken, readBook); 
+router.get('/read/:id', readBook); 
 export default router;
