@@ -4,35 +4,27 @@ import { getUploadUrl, getReadUrl } from "../services/s3.service.js";
 
 // POST /api/books/generate-upload-link - Lấy presigned URL để upload file lên S3
 export const getUploadUrlHandler = async (req, res) => {
-  const { fileName, fileType } = req.body;
-
-  if (!fileName || !fileType) {
-    return res.status(400).json({
-      success: false,
-      message: "Thiếu fileName hoặc fileType",
-    });
-  }
-
   try {
-    // Tạo tên file duy nhất
-    const uniqueFileName = `${Date.now()}-${fileName}`;
+    const { coverName, coverType, bookName, bookType } = req.body;
 
-    // Gọi Service S3 để lấy presigned URL
-    const uploadUrl = await getUploadUrl(uniqueFileName, fileType);
+    // Tạo tên file duy nhất
+    const cover_image_key = `covers/${Date.now()}-${coverName}`;
+    const book_file_key = `books/${Date.now()}-${bookName}`;
+
+    const coverUploadUrl = await getUploadUrl(cover_image_key, coverType);
+    const bookUploadUrl = await getUploadUrl(book_file_key, bookType);
 
     res.json({
       success: true,
-      message: "Lấy URL upload thành công",
-      uploadUrl,
-      fileKey: uniqueFileName,
+      data: {
+        cover_image: { uploadUrl: coverUploadUrl, key: cover_image_key },
+        book: { uploadUrl: bookUploadUrl, key: book_file_key },
+      },
     });
   } catch (error) {
-    console.error("Lỗi khi lấy URL upload:", error);
-    res.status(500).json({
-      success: false,
-      message: "Lỗi server khi lấy URL upload",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ message: "Lỗi khi tạo presigned URL", error: error.message });
   }
 };
 
@@ -45,19 +37,20 @@ export const createBook = async (req, res) => {
     category_id,
     book_file_key,
     cover_image_key,
+    is_premium,
   } = req.body;
 
-  if (!title || !book_file_key) {
+  if (!title || !book_file_key || !cover_image_key) {
     return res.status(400).json({
       success: false,
-      message: "Tiêu đề và file sách là bắt buộc.",
+      message: "Tiêu đề, file sách và ảnh bìa là bắt buộc.",
     });
   }
 
   try {
     const queryText = `
-      INSERT INTO books (title, author, description, category_id, book_file_key, cover_image_key)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO books (title, author, description, category_id, book_file_key, cover_image_key, is_premium)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *;
     `;
     const values = [
@@ -67,6 +60,7 @@ export const createBook = async (req, res) => {
       category_id,
       book_file_key,
       cover_image_key,
+      is_premium || false,
     ];
 
     const result = await db.query(queryText, values);
@@ -111,9 +105,20 @@ export const getBooks = async (req, res) => {
     queryText += " ORDER BY books.created_at DESC";
 
     const result = await db.query(queryText, values);
+
+    const booksWithUrls = await Promise.all(
+      result.rows.map(async (book) => {
+        return {
+          ...book,
+          cover_url: book.cover_image_key
+            ? await getReadUrl(book.cover_image_key)
+            : null,
+        };
+      })
+    );
     res.json({
       success: true,
-      books: result.rows,
+      books: booksWithUrls,
     });
   } catch (error) {
     console.error("Lỗi khi lấy danh sách sách:", error);
@@ -139,9 +144,16 @@ export const getBookDetail = async (req, res) => {
       });
     }
 
+    const book = result.rows[0];
+
+    const bookWithUrls = {
+      ...book,
+      cover_url: book.cover_image_key ? await getReadUrl(book.cover_image_key) : null,
+    };
+
     res.json({
       success: true,
-      book: result.rows[0],
+      book: bookWithUrls,
     });
   } catch (error) {
     console.error("Lỗi khi lấy chi tiết sách:", error);

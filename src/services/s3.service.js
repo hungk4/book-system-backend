@@ -13,7 +13,7 @@ const s3Client = new S3Client({ region: process.env.AWS_REGION,
 /**
  * Hàm lấy link upload (Presigned URL)
  * @param {string} fileName - Tên file muốn lưu trên S3
- * @param {string} fileType - Loại file (ví dụ: 'application/pdf')
+ * @param {string} fileType - Loại file (ví dụ: 'application/pdf, image/jpeg')
  * @returns {Promise<string>} - Trả về link upload
  */
 export const getUploadUrl = async (fileName, fileType) => {

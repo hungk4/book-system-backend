@@ -22,7 +22,6 @@ router.post(
 // POST /api/books
 router.post("/", verifyToken, verifyAdmin, createBook);
 
-
 // --- Public Routes ---
 // GET /api/books - Lấy danh sách tất cả sách
 router.get('/', getBooks);
@@ -31,6 +30,6 @@ router.get('/', getBooks);
 router.get('/:id', getBookDetail); 
 
 // GET /api/books/read/:id - Đọc sách (yêu cầu xác thực)
-// router.get('/read/:id', verifyToken, readBook); 
-router.get('/read/:id', readBook); 
+router.get('/read/:id', verifyToken, readBook); 
+
 export default router;
