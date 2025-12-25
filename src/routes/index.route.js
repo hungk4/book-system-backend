@@ -2,6 +2,7 @@ import { Router } from "express";
 import authRoutes from "./auth.routes.js";
 import bookRoutes from "./book.routes.js";
 import categoryRoutes from "./category.routes.js";
+import paymentRoutes from "./payment.routes.js";
 
 import db from "../config/db.js";
 
@@ -11,6 +12,7 @@ const router = Router();
 router.use("/auth", authRoutes);
 router.use('/books', bookRoutes); 
 router.use('/categories', categoryRoutes);
+router.use('/payments', paymentRoutes);
 
 
 router.get("/test-db", async (req, res) => {

@@ -1,0 +1,11 @@
+import { Router } from "express";
+import { createPaymentUrl, vnpayIpn, vnpayReturn } from "../controllers/payment.controller.js";
+import { verifyToken } from '../middleware/auth.middleware.js';
+
+const router = Router();
+
+router.post("/create-payment-url", verifyToken, createPaymentUrl);
+router.get("/vnpay-ipn", vnpayIpn); 
+router.get("/vnpay-return", vnpayReturn);
+
+export default router;
