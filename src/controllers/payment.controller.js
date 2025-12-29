@@ -59,12 +59,12 @@ export const createPaymentUrl = (req, res) => {
   vnp_Params["vnp_SecureHash"] = signed;
   vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
 
-  console.log("paymentUrl: ", vnpUrl)
+  // console.log("paymentUrl: ", vnpUrl)
   res.status(200).json({ paymentUrl: vnpUrl });
 };
 
 export const vnpayIpn = async (req, res) => {
-  console.log("VNPay IPN called:", req.query);
+  // console.log("VNPay IPN called:", req.query);
 
   let vnp_Params = req.query;
   let secureHash = vnp_Params["vnp_SecureHash"];
@@ -164,7 +164,7 @@ function sortObject(obj) {
   let keys = [];
 
   for (let key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) { // obj.hasOwnProperty(key) sẽ gây lỗi vì obj có thể là null prototype
       keys.push(encodeURIComponent(key));
     }
   }
@@ -176,7 +176,7 @@ function sortObject(obj) {
     let value = obj[currentKey];
 
     if (value !== null && value !== undefined && value !== "") {
-      sorted[currentKey] = encodeURIComponent(value).replace(/%20/g, "+"); // Thay thế khoảng trắng bằng dấu +
+        sorted[currentKey] = encodeURIComponent(value).replace(/%20/g, "+");
     }
   }
 
