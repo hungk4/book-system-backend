@@ -158,12 +158,6 @@ export const vnpayIpn = async (req, res) => {
   }
 };
 
-export const vnpayReturn = (req, res) => {
-  console.log("VNPay Return called:", req.query);
-  res.redirect(
-    `${process.env.CLIENT_URL}/payment-result?vnp_ResponseCode=${req.query.vnp_ResponseCode}`
-  );
-};
 
 function sortObject(obj) {
   let sorted = {};

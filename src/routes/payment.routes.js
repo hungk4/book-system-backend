@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createPaymentUrl, vnpayIpn, vnpayReturn } from "../controllers/payment.controller.js";
+import { createPaymentUrl, vnpayIpn } from "../controllers/payment.controller.js";
 import { verifyToken } from '../middleware/auth.middleware.js';
 
 const router = Router();
