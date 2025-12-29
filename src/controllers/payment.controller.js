@@ -59,10 +59,13 @@ export const createPaymentUrl = (req, res) => {
   vnp_Params["vnp_SecureHash"] = signed;
   vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
 
+  console.log("paymentUrl: ", vnpUrl)
   res.status(200).json({ paymentUrl: vnpUrl });
 };
 
 export const vnpayIpn = async (req, res) => {
+  console.log("VNPay IPN called:", req.query);
+
   let vnp_Params = req.query;
   let secureHash = vnp_Params["vnp_SecureHash"];
 
@@ -140,8 +143,6 @@ export const vnpayIpn = async (req, res) => {
 
         await db.query("COMMIT");
 
-        console.log(`Thanh toán thành công cho user ${userId}, gói ${months} tháng.`);
-
         res.status(200).json({ RspCode: "00", Message: "Success" });
       } catch (error) {
         await db.query("ROLLBACK");
@@ -158,6 +159,7 @@ export const vnpayIpn = async (req, res) => {
 };
 
 export const vnpayReturn = (req, res) => {
+  console.log("VNPay Return called:", req.query);
   res.redirect(
     `${process.env.CLIENT_URL}/payment-result?vnp_ResponseCode=${req.query.vnp_ResponseCode}`
   );

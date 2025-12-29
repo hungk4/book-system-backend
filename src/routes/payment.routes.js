@@ -6,6 +6,6 @@ const router = Router();
 
 router.post("/create-payment-url", verifyToken, createPaymentUrl);
 router.get("/vnpay-ipn", vnpayIpn); 
-router.get("/vnpay-return", vnpayReturn);
+
 
 export default router;
