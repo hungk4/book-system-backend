@@ -1,0 +1,54 @@
+services:
+  # 1. Cơ sở dữ liệu PostgreSQL
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      # Lấy giá trị trực tiếp từ file .env của backend (be/.env)
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+  # 2. Dịch vụ Backend
+  backend:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    env_file:
+      - .env # Nạp toàn bộ biến môi trường từ be/.env
+    environment:
+      # Ghi đè HOST để backend kết nối tới tên service 'db' nội bộ thay vì localhost
+      - DB_HOST=db
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_DATABASE}
+    networks:
+      - app-network
+
+  # 3. Dịch vụ Frontend
+  frontend:
+    build:
+      context: ../fe # Nhảy ra ngoài thư mục be để tìm folder fe
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    env_file:
+      - ../fe/.env # Nạp toàn bộ biến môi trường từ fe/.env
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+# Khai báo Volume để lưu trữ dữ liệu Database bền vững
+volumes:
+  postgres_data:
