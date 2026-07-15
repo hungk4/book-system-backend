@@ -62,6 +62,26 @@ export const sepayWebhook = async (req, res) => {
         return res.json({ success: true, message: "Đã xử lý trước đó" });
       }
 
+      // 3.5. Kiểm tra số tiền chuyển khoản thực tế với giá gói trong cấu hình DB
+      const configQuery = await db.query(
+        "SELECT value FROM system_settings WHERE key = 'premium_packages'"
+      );
+      const premiumPackages = configQuery.rows[0]?.value || [];
+      const pkg = premiumPackages.find(p => Number(p.duration_months) === months);
+
+      if (!pkg) {
+        console.warn(`Webhook SePay: Không tìm thấy gói VIP ${months} tháng trong cấu hình.`);
+        return res.json({ success: true, message: "Gói đăng ký không tồn tại" });
+      }
+
+      const expectedAmount = Number(pkg.price);
+      const actualAmount = Number(transferAmount);
+
+      if (actualAmount < expectedAmount) {
+        console.warn(`Webhook SePay: Số tiền không đủ cho gói ${months} tháng. Giao dịch: ${referenceCode}, Thực nhận: ${actualAmount}, Yêu cầu: ${expectedAmount}`);
+        return res.json({ success: true, message: "Số tiền chuyển khoản không đủ để nâng cấp gói" });
+      }
+
       await db.query("BEGIN");
 
       // 4. Tìm gói cũ để nối ngày hoặc lấy ngày hôm nay
